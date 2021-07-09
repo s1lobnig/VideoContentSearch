@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>Titel</title>
+    <script src="script.js" defer="true"></script>
+    <style media="screen">
+      body {display: flex; flex-direction: column; justify-content: center; align-items: center;}
+    </style>
+  </head>
+  <body>
+
+    <h1>Video Content Search</h1>
+
+    <form id="form">
+      <label id="lconcept" for="concept">Content: </label>
+      <input id="concept" type="text">
+      <br><br>
+      <label id="lconfidence" for="confidence">Confidence: </label>
+      <input id="confidence" type="range" min="0" max="1" step="0.1" value="0.5" onchange="updateValue()" onmousemove="updateValue()">
+      <span id="confidenceValue">..</span>
+      <br><br>
+      <button id="search" type="button" name="search" onclick="getVideos()">Search</button>
+    </form>
+
+    <div id="div">
+      <h2>Resulting Images</h2>
+      <div id="videoResult">
+      </div>
+    </div>
+
+  </body>
+</html>
