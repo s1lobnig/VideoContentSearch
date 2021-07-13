@@ -1,0 +1,1 @@
+copy public.conceptk (id, name) FROM 'C:\conceptslist.csv' DELIMITER ';' CSV ENCODING 'UTF8'
