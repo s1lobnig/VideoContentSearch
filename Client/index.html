@@ -5,6 +5,7 @@
     <script src="script.js" defer="true"></script>
     <style media="screen">
       body {display: flex; flex-direction: column; justify-content: center; align-items: center;}
+      h2 {text-align: center;}
     </style>
   </head>
   <body>
@@ -23,8 +24,13 @@
     </form>
 
     <div id="div">
-      <h2>Resulting Images</h2>
-      <div id="videoResult">
+      <div id="noResultDiv">
+        <h2>No results for this concept and confidence</h2>
+      </div>
+      <div id="resultDiv">
+        <h2>Resulting Images</h2>
+        <div id="videoResult">
+        </div>
       </div>
     </div>
 

@@ -3,8 +3,10 @@ var value = document.querySelector("#confidenceValue");
 var concept = document.querySelector("#concept");
 var resultField = document.querySelector("#videoResult")
 var search = document.querySelector("#search");
-var div = document.querySelector("#div");
-  div.style.visibility = "hidden";
+var resultDiv = document.querySelector("#resultDiv");
+resultDiv.style.visibility = "hidden";
+var noResultDiv = document.querySelector("#noResultDiv");
+noResultDiv.style.visibility = "hidden";
 
 function updateValue() {
   value.innerHTML = confidence.value;
@@ -44,16 +46,22 @@ function getVideos() {
 function showImageResults(json) {
   console.log(json);
 
-  div.style.visibility = "visible";
   return new Promise((resolve, reject) => {
       let htmlOut = "";
       Object.keys(json).forEach(
         (key) => {
           htmlOut += `<img src="${json[key].keypath}"
-                           alt="video: ${json[key].videoid}, confidence= ${json[key].confidence}">`;
+                           alt="confidence= ${json[key].confidence}">`;
         }
       );
-      resultField.innerHTML = htmlOut;
+      if (htmlOut == "") {
+        resultDiv.style.visibility = "hidden";
+        noResultDiv.style.visibility = "visible";
+      } else {
+        noResultDiv.style.visibility = "hidden";
+        resultDiv.style.visibility = "visible";
+        resultField.innerHTML = htmlOut;
+      }
       resolve();
     });
 }
