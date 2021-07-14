@@ -5,9 +5,47 @@ import os
 import torch
 import pandas as pd
 import sys
+import psycopg2
 
 
-alexnet = models.alexnet(pretrained=True)
+# check parameter
+if (len(sys.argv) != 6):
+    print('This programm can be called: torchImageClassification.py <path> <host> <dbname> <username> <password>')
+    exit(1)
+
+path = ""
+host = ""
+dbname = ""
+username = ""
+password = ""
+try:
+    path = sys.argv[1]
+    host = sys.argv[2]
+    dbname = sys.argv[3]
+    username = sys.argv[4]
+    password = sys.argv[5]
+except:
+    print("error parsing program arguments")
+    exit(1)
+
+try:
+    conn = psycopg2.connect(
+        host=host,
+        database=dbname,
+        user=username,
+        password=password
+    )
+    cur = conn.cursor()
+except Exception as e:
+    print("error connecting to db")
+    exit(1)
+
+net = models.resnet18(pretrained=True)
+net.fc = torch.nn.Sequential(
+    net.fc,
+    torch.nn.Softmax(),
+)
+
 preprocess = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -21,29 +59,23 @@ def runAnalysis(img_path):
     input_tensor = preprocess(input_image)
     input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
     with torch.no_grad():
-        output = alexnet(input_batch)
-    return output.argmax(1).item()+1
-
-# check parameter
-if (len(sys.argv) < 2):
-    print('This programm needs exactly one (image to be analyzed) argument')
-
-path = ""
-try:
-    path = sys.argv[1]
-except:
-    print("error parsing program argument")
-    exit(1)
-
-if (os.path.exists(path)):
-    print("parameter must be an existing folder of images or an existing image to be analyzed")
+        output = net(input_batch)
+    conceptid = output.argmax(1).item()
+    confidence = output[0,conceptid].item()
+    print(img_path)
+    print(conceptid+1)
+    print(confidence)
+    #sql = '''Insert into keyframe (path, conceptid, confidence)
+    #            values (%s, %s, %s)'''
+    #cur.execute(sql, (img_path, conceptid+1, confidence))
+    #conn.commit()
 
 # iterate images in folder if input parameter is a folder
 if (os.path.isdir(path)):
     for filename in os.listdir(path):
         if filename.endswith(".jpg") or filename.endswith(".png"):
-            print(runAnalysis(path))
+            runAnalysis(path + filename)
 elif (path.endswith(".jpg") or path.endswith(".png")):
-    print(runAnalysis(path))
+    runAnalysis(path)
 
 exit(0)
