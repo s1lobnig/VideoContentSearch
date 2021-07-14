@@ -2,8 +2,6 @@
 //
 
 
-//https://medium.com/@subwaymatch/opencv-410-with-vs-2019-3d0bc0c81d96
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -15,7 +13,7 @@
 #include <iterator>
 #include <iostream>
 #include <string.h>
-//#include <stdarg.h>
+
 #include "opencv2/highgui.hpp"
 #include <list>
 #include <iterator>
@@ -33,8 +31,8 @@ using namespace std;
 
 
 
-#define T_H 160000
-#define T_D 20000
+#define T_H 120000
+#define T_D 17000
 
 //prototypes
 void calcHistogram64BinV1(Mat img, vector<float>& destHist, bool show);
@@ -48,7 +46,8 @@ void processVideo(std::string videoLocation, std::string shotsLocation)
 	//Mat im;
 	Mat frame;
 	VideoCapture cap = VideoCapture(videoLocation);
-	int waitTime = 1000 / cap.get(CAP_PROP_FPS);
+	//int waitTime = 1000 / cap.get(CAP_PROP_FPS);
+	int waitTime = 50 / cap.get(CAP_PROP_FPS); //speeded up version
 
 
 
@@ -147,7 +146,7 @@ void processVideo(std::string videoLocation, std::string shotsLocation)
 		std::string fileDestination = shotsLocation;//) << std::string(i);// << " " << shotStart << "-" << shotStop << ".jpg";
 		fileDestination.append("Shot");
 		fileDestination.append(std::to_string(i));
-		fileDestination.append(std::string(" "));
+		fileDestination.append(std::string("_"));
 		fileDestination.append(std::to_string(shotStart));
 		fileDestination.append(std::string("-"));
 		fileDestination.append(std::to_string(shotStop));

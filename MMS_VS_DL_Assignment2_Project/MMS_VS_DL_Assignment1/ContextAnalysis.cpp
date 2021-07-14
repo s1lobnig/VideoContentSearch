@@ -1,6 +1,7 @@
 #include "ContextAnalysis.h"
 
-void processContextAnalysis(std::string shotsDir, std::string pythonLocation, std::string pythonName)
+
+void processContextAnalysis(std::string shotsDir, std::string pythonLocation, std::string pythonName, std::string pHost, std::string pDbName, std::string pUserName, std::string pPw)
 {
     char   psBuffer[128];
     FILE* pPipe;
@@ -9,8 +10,26 @@ void processContextAnalysis(std::string shotsDir, std::string pythonLocation, st
      * pipe with read text attribute so that we can read it
      * like a text file.
      */
+    cout << "Calling python program!\n";
 
-    if ((pPipe = _popen("cd C:\\Users\\Klaus\\Desktop\\ & python test2.py", "rt")) == NULL)
+    //prepare command
+    std::string pythonCmd = "cd ";
+    pythonCmd.append(pythonLocation);
+    pythonCmd.append(" & python ");
+    pythonCmd.append(pythonName);
+    pythonCmd.append(" ");
+    pythonCmd.append(shotsDir);
+    pythonCmd.append(" ");
+    pythonCmd.append(pHost);
+    pythonCmd.append(" ");
+    pythonCmd.append(pDbName);
+    pythonCmd.append(" ");
+    pythonCmd.append(pUserName);
+    pythonCmd.append(" ");
+    pythonCmd.append(pPw);
+    pythonCmd.append(" ");
+        
+    if ((pPipe = _popen(pythonCmd.c_str(), "rt")) == NULL)
         exit(1);
 
     /* Read pipe until end of file, or an error occurs. */

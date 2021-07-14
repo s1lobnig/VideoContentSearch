@@ -27,20 +27,31 @@ namespace fs = std::filesystem;
 using namespace cv;
 using namespace std;
 
-std::string OP_SHOT_DETECTION = "-sd";
-std::string OP_CONTEXT_ANALYSIS = "-c";
-std::string OP_UPLOAD = "-u";
 
 
-#define MINIMAL_ARGS_OPERATION 2
+
+#define OPERATION_SUCCESSFULL   0
+#define OPERATION_FAILED        1
+
+#define PYTHON_SCRIPT_NAME "torchImageClassification.py"
+
+#define NUM_OF_CMD_PARAMS       6
+
+#define CMD_PARAM_VIDEOS_DIR    1
+#define CMD_PARAM_HOST          2
+#define CMD_PARAM_DB_NAME       3
+#define CMD_PARAM_USER_NAME     4
+#define CMD_PARAM_PW            5
+
+
 
 //#define DEBUG
 
 
 //prototypes
-void operationShotDetection(std::string videoDir, std::string outputDir);
-void opertationContextAnalysis(std::string shotsDir, std::string pythonDir, std::string pythonName);
-void operationUpload(void);
+int operationShotDetection(std::string videoDir, std::string outputDir);
+int opertationContextAnalysis(std::string shotsDir, std::string pythonDir, std::string pythonName, std::string pHost, std::string pDbName, std::string pUserName, std::string pPw);
+
 
 
 //https ://learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/
@@ -53,60 +64,92 @@ int main(int argc, char* argv[])
     }
 
     
-    /*
+    
     //check arguments for operation
-    if (argc < MINIMAL_ARGS_OPERATION)
+    if (argc < NUM_OF_CMD_PARAMS)
     {
-        cout << "Not enough arguments!";
+        cout << "Not enough arguments!\n";
+        cout << "[arg1] = directory to folder with videos\n";
+        cout << "[arg2] = SQL Host\n";
+        cout << "[arg3] = SQL DB-Name\n";
+        cout << "[arg4] = SQL User-Name\n";
+        cout << "[arg5] = SQL PW\n";
         return 0;
     }
     
-    //check operation
-    std::string directory = argv[0];
-    std::string operation = argv[1];
-    */
-    std::string directory = argv[0];
-    std::string operation = "-c";
-    if (operation.compare(OP_SHOT_DETECTION) == 0)
+    
+    
+    //exe directory
+    std::string exeDirectory = argv[0];
+    size_t lastIndex = exeDirectory.find_last_of("\\");
+    exeDirectory = exeDirectory.substr(0, lastIndex);
+    
+    //shots directory
+    std::string shotsDirectory = exeDirectory;
+    shotsDirectory.append("\\shots");
+    
+    //video directory
+    std::string videoDirectory = argv[CMD_PARAM_VIDEOS_DIR];
+
+    //python name
+    std::string pythonName = PYTHON_SCRIPT_NAME;
+
+    //host
+    std::string host = argv[CMD_PARAM_HOST];
+    
+    //db name
+    std::string dbName = argv[CMD_PARAM_DB_NAME];
+
+    //user name
+    std::string userName = argv[CMD_PARAM_USER_NAME];
+
+    //pw
+    std::string pw = argv[CMD_PARAM_PW];
+    
+   
+    
+    //step 1: process shots
+    if (operationShotDetection(videoDirectory, shotsDirectory) == OPERATION_SUCCESSFULL)
     {
-        cout << "SHOTDETECTION!\n";
-        
-        operationShotDetection("C:\\project\\videos\\", "C:\\Users\\Klaus\\Desktop\\shots");
-    }
-    else if (operation.compare(OP_CONTEXT_ANALYSIS) == 0)
-    {
-        cout << "CONTEXT ANALYSIS!\n";
-        opertationContextAnalysis("C:\\Users\\Klaus\\Desktop\\shots", "C:\\Users\\Klaus\\Desktop\\", "test2.py");
-    }
-    else if (operation.compare(OP_UPLOAD) == 0)
-    {
-        cout << "UPLOAD!";
+        //step 2: process context analysis
+        opertationContextAnalysis(shotsDirectory, exeDirectory, pythonName, host, dbName, userName, pw);
     }
     else
     {
-        cout << "Invalid operation! Operations are:\n " << OP_SHOT_DETECTION << " for shot detection\n " << OP_CONTEXT_ANALYSIS << " for context analysis\n " << OP_UPLOAD << " to upload into db";
+        cout << "Application stopped with an error!";
     }
-     
-    
-    
+              
     return 0;
-
-	
 }
+
 inline bool ends_with(std::string const& value, std::string const& ending)
 {
     if (ending.size() > value.size()) return false;
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
-void operationShotDetection(std::string videoDir, std::string outputDir)
+
+int operationShotDetection(std::string videoDir, std::string outputDir)
 {
-    
+    cout << "Starting shotdetection!";
     using std::cout; using std::cin;
     using std::endl; using std::string;
     using std::filesystem::directory_iterator;
 
     vector<std::string> filePaths;
     vector<std::string> fileNames;
+    
+    //check if folder exists
+    if (fs::exists(videoDir))
+    {
+        cout << "Found folder " << videoDir;
+    }
+    else
+    {
+        cout << "Folder " << videoDir << " does not exist!";
+        return OPERATION_FAILED;
+    }
+
+    //collect .mp4 clips inside the folder
     for (const auto& file : directory_iterator(videoDir))
     {        
         std::string p{ file.path().u8string() };
@@ -120,7 +163,7 @@ void operationShotDetection(std::string videoDir, std::string outputDir)
     }
 
 
-    //output discovered files 
+    //output discovered clips 
     cout << "Found the following videos:\n";
     for (const auto& f : fileNames)
     {
@@ -136,7 +179,10 @@ void operationShotDetection(std::string videoDir, std::string outputDir)
         cout << fileNames[i] << " .... ";
         std::string shotsLocation = outputDir;
         shotsLocation.append("\\");
-        shotsLocation.append(fileNames[i]);
+        size_t lastindex = fileNames[i].find_last_of(".");
+        std::string trimmedFileName = fileNames[i].substr(0, lastindex);
+        shotsLocation.append(trimmedFileName);
+        shotsLocation.append("_mp4");
         shotsLocation.append("\\");
         fs::create_directory(shotsLocation);
         processVideo(f, shotsLocation);
@@ -144,12 +190,15 @@ void operationShotDetection(std::string videoDir, std::string outputDir)
         cout << "Done!\n";
     }
 
-    cout << "DONE DONE DONE!!!\n";
-
+    cout << "Shotdetection DONE!\n";
+    return OPERATION_SUCCESSFULL;
 }
 
-void opertationContextAnalysis(std::string shotsDir, std::string pythonDir, std::string pythonName)
+int opertationContextAnalysis(std::string shotsDir, std::string pythonDir, std::string pythonName, std::string pHost, std::string pDbName, std::string pUserName, std::string pPw)
 {
+
+    //collect available folders with shots
+    //folder must end with "mp4"
     using std::cout; using std::cin;
     using std::endl; using std::string;
     using std::filesystem::directory_iterator;
@@ -158,8 +207,7 @@ void opertationContextAnalysis(std::string shotsDir, std::string pythonDir, std:
     vector<std::string> fileNames;
     for (const auto& file : directory_iterator(shotsDir))
     {
-        //std::string p{ file.path().u8string() };
-        //cout << file.path() << "\n";
+        
         std::string p{ file.path().u8string() };
         if (ends_with(p, "mp4") && file.is_directory())
         {                        
@@ -180,18 +228,15 @@ void opertationContextAnalysis(std::string shotsDir, std::string pythonDir, std:
     for (const auto& s : filePaths)
     {
         cout << fileNames[i] << " ... ";
-        processContextAnalysis(s, pythonDir, pythonName);
+        processContextAnalysis(s, pythonDir, pythonName, pHost, pDbName, pUserName, pPw);
         cout << "Done!\n";
         i++;
     }
-
-
-}
-
-void operationUpload(void) 
-{
+    return OPERATION_SUCCESSFULL;
 
 }
+
+
 
 
 // Programm ausführen: STRG+F5 oder Menüeintrag "Debuggen" > "Starten ohne Debuggen starten"
