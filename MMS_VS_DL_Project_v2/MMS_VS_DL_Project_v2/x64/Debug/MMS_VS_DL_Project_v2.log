@@ -1,0 +1,5 @@
+﻿  MMS_VS_DL_Project_v2.cpp
+  ShotDetection.cpp
+C:\Users\Klaus\Documents\GitHub\VideoContentSearch\MMS_VS_DL_Project_v2\MMS_VS_DL_Project_v2\ShotDetection.cpp(49,15): warning C4244: "Initialisierung": Konvertierung von "double" in "int", möglicher Datenverlust
+  Code wird generiert...
+  MMS_VS_DL_Project_v2.vcxproj -> C:\Users\Klaus\Documents\GitHub\VideoContentSearch\MMS_VS_DL_Project_v2\x64\Debug\MMS_VS_DL_Project_v2.exe

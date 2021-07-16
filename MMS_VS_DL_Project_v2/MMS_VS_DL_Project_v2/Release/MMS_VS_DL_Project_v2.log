@@ -1,0 +1,5 @@
+﻿  ContextAnalysis.cpp
+  MMS_VS_DL_Project_v2.cpp
+C:\Users\Klaus\Documents\GitHub\VideoContentSearch\MMS_VS_DL_Project_v2\MMS_VS_DL_Project_v2\MMS_VS_DL_Project_v2.cpp(3,10): fatal error C1083: Datei (Include) kann nicht geöffnet werden: "opencv2/core/core.hpp": No such file or directory
+  ShotDetection.cpp
+C:\Users\Klaus\Documents\GitHub\VideoContentSearch\MMS_VS_DL_Project_v2\MMS_VS_DL_Project_v2\ShotDetection.cpp(3,10): fatal error C1083: Datei (Include) kann nicht geöffnet werden: "opencv2/core/core.hpp": No such file or directory
